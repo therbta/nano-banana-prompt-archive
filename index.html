@@ -7,6 +7,7 @@
     <title>Nano Banana Pro Prompts Collection</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
     <style>
         :root {
@@ -163,7 +164,22 @@
             .search-box, .filter-group, .view-toggles, .page-size-selector { width: 100%; }
             .prompts-grid { grid-template-columns: 1fr; }
             .toast { left: 1rem; right: 1rem; bottom: 1rem; }
+            .toast { left: 1rem; right: 1rem; bottom: 1rem; }
         }
+
+        /* Tabs & Favorites */
+        .tabs-container { width: 100%; display: flex; gap: 1rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); }
+        .tab-btn { background: transparent; border: none; border-bottom: 2px solid transparent; padding: 0.75rem 0.25rem; color: var(--text-muted); font-size: 0.938rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; transition: all 0.2s; }
+        .tab-btn:hover { color: var(--text-primary); }
+        .tab-btn.active { color: var(--text-primary); border-bottom-color: var(--accent-primary); }
+        .tab-count { background: var(--bg-tertiary); padding: 0.125rem 0.375rem; border-radius: 4px; font-size: 0.75rem; }
+        
+        .visible-count { color: var(--text-muted); font-size: 0.813rem; margin-left: auto; }
+
+        .btn-favorite { color: var(--text-muted); transition: all 0.2s; }
+        .btn-favorite:hover { color: #ef4444; background: rgba(239, 68, 68, 0.1); }
+        .btn-favorite.active { color: #ef4444; fill: #ef4444; }
+        .btn-favorite.active .ph-heart { font-weight: fill; }
     </style>
 
 </head>
@@ -234,6 +250,16 @@
 
     <div class="controls">
         <div class="controls-inner">
+            <div class="tabs-container">
+                <button class="tab-btn active" data-tab="all">
+                    <i class="ph ph-squares-four"></i> all prompts
+                </button>
+                <button class="tab-btn" data-tab="favorites">
+                    <i class="ph ph-heart"></i> favorites
+                    <span class="tab-count" id="favCountBadge">0</span>
+                </button>
+                <span class="visible-count" id="visibleCount">Showing 0 prompts</span>
+            </div>
             <div class="search-box">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <circle cx="11" cy="11" r="8"></circle>
@@ -309,6 +335,8 @@
         let searchTerm = '';
         let filteredIndices = [];
         let currentPromptMode = 'generic';
+        let favorites = new Set(JSON.parse(localStorage.getItem('nanoBananaFavorites') || '[]'));
+        let currentTab = 'all';
 
         async function loadData() {
             try {
@@ -376,6 +404,9 @@
                             <span class="badge badge-model">${item.model}</span>
                         </div>
                         <div class="card-actions">
+                            <button class="btn-icon btn-favorite ${favorites.has(item.id) ? 'active' : ''}" onclick="toggleFavorite(${item.id})" title="Toggle Favorite">
+                                <i class="ph-heart ${favorites.has(item.id) ? 'ph-fill' : 'ph'}"></i>
+                            </button>
                             <button class="btn-icon btn-copy" onclick="copyPrompt(${item.id})" title="Copy">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
                             </button>
@@ -421,11 +452,15 @@
                 const promptType = item.promptType.toLowerCase();
                 const matchesSearch = searchTerm === '' || promptText.includes(searchTerm);
                 const matchesFilter = currentFilter === 'all' || promptType.includes(currentFilter);
-                if (matchesSearch && matchesFilter) {
+
+                const matchesTab = currentTab === 'all' || (currentTab === 'favorites' && favorites.has(item.id));
+
+                if (matchesSearch && matchesFilter && matchesTab) {
                     filteredIndices.push(index);
                 }
             });
             currentPage = 1;
+            document.getElementById('visibleCount').textContent = `Showing ${filteredIndices.length} prompts`;
             updateDisplay();
         }
 
@@ -503,12 +538,54 @@
         window.closeImageViewer = function() {
             document.getElementById('imageViewer').classList.remove('active');
             document.body.style.overflow = '';
+            document.body.style.overflow = '';
         };
+
+        window.toggleFavorite = function (id) {
+            if (favorites.has(id)) {
+                favorites.delete(id);
+            } else {
+                favorites.add(id);
+            }
+            localStorage.setItem('nanoBananaFavorites', JSON.stringify([...favorites]));
+            updateFavCount();
+
+            // If we are in favorites tab, refresh the list to remove un-favorited item
+            if (currentTab === 'favorites') {
+                filterPrompts();
+            } else {
+                // Just update the specific button state to avoid full re-render
+                const btn = document.querySelector(`.prompt-card[data-id="${id}"] .btn-favorite`);
+                const icon = btn.querySelector('i');
+                if (favorites.has(id)) {
+                    btn.classList.add('active');
+                    icon.classList.remove('ph');
+                    icon.classList.add('ph-fill');
+                } else {
+                    btn.classList.remove('active');
+                    icon.classList.remove('ph-fill');
+                    icon.classList.add('ph');
+                }
+            }
+        };
+
+        function updateFavCount() {
+            document.getElementById('favCountBadge').textContent = favorites.size;
+        }
 
         function init() {
             document.getElementById('searchInput').addEventListener('input', (e) => {
                 searchTerm = e.target.value.toLowerCase();
                 filterPrompts();
+            });
+
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentTab = btn.dataset.tab;
+                    filterPrompts();
+                });
             });
 
             document.querySelectorAll('.filter-btn').forEach(btn => {
@@ -566,6 +643,7 @@
             });
 
             renderPrompts();
+            updateFavCount();
             // Initialize body data-mode
             document.body.setAttribute('data-mode', currentPromptMode);
         }
