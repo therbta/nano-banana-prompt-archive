@@ -409,9 +409,15 @@
             filteredIndices = [];
             promptsData.forEach((item, index) => {
                 const modeKey = currentPromptMode === 'reference' ? 'withReferenceUpload' : 'generic';
+                const promptsObj = item.prompts || item;
                 const formattedPromptsObj = item.formattedPrompts || item;
-                const promptData = formattedPromptsObj[modeKey] || formattedPromptsObj.generic || item;
-                const promptText = (promptData.formattedPrompt || promptData.prompt || item.formattedPrompt || item.prompt).toLowerCase();
+
+                // Check if reference prompt exists when in reference mode
+                if (currentPromptMode === 'reference' && !promptsObj[modeKey] && !formattedPromptsObj[modeKey]) {
+                    return; // Skip this prompt if it doesn't have a reference version
+                }
+
+                const promptText = (formattedPromptsObj[modeKey] || formattedPromptsObj.generic || item.formattedPrompt || item.prompt).toLowerCase();
                 const promptType = item.promptType.toLowerCase();
                 const matchesSearch = searchTerm === '' || promptText.includes(searchTerm);
                 const matchesFilter = currentFilter === 'all' || promptType.includes(currentFilter);
