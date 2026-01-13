@@ -30,14 +30,7 @@ body:
     validations:
       required: true
   
-  - type: input
-    id: model
-    attributes:
-      label: Model Compatibility
-      description: Which model is this designed for? (e.g. Midjourney v6, DALL-E 3)
-      placeholder: Midjourney v6
-    validations:
-      required: true
+
 
   - type: textarea
     id: generic-prompt
