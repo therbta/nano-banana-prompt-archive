@@ -6,7 +6,7 @@ on:
 
 jobs:
   add-prompt:
-    if: github.event.label.name == 'approved'
+    if: github.event.label.name == 'Approved'
     runs-on: ubuntu-latest
     permissions:
       contents: write
