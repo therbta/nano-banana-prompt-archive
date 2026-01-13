@@ -12,6 +12,12 @@ A curated collection of **496 professional AI prompts** with advanced filtering,
 
 </div>
 
+<p align="center">
+  <a href="https://therbta.github.io/nano-banana-prompting/" target="_blank">
+    <img src="screenshot.png" alt="Nano Banana Pro Prompts Screenshot" width="800" />
+  </a>
+</p>
+
 ---
 
 ## ✨ Features
