@@ -78,18 +78,31 @@ jobs:
             console.log(`Added prompt ID ${newId} from issue #${issue.number}`);
             return { newId, promptType };
 
+      - name: Commit and push changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b add-prompt-${{ github.event.issue.number }}
+          git add data.json
+          git commit -m "Add prompt from issue #${{ github.event.issue.number }}"
+          git push origin add-prompt-${{ github.event.issue.number }}
+      
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v6
+        uses: actions/github-script@v7
         with:
-          commit-message: 'Add prompt from issue #${{ github.event.issue.number }}'
-          branch: add-prompt-${{ github.event.issue.number }}
-          title: 'Add Prompt: Issue #${{ github.event.issue.number }}'
-          body: |
-            Auto-generated PR from approved issue #${{ github.event.issue.number }}
+          script: |
+            const { data: pr } = await github.rest.pulls.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: 'Add Prompt: Issue #${{ github.event.issue.number }}',
+              head: 'add-prompt-${{ github.event.issue.number }}',
+              base: 'main',
+              body: `Auto-generated PR from approved issue #${{ github.event.issue.number }}\n\nPlease review and merge if everything looks correct.\n\nCloses #${{ github.event.issue.number }}`
+            });
             
-            Please review and merge if everything looks correct.
-            
-            Closes #${{ github.event.issue.number }}
-          labels: auto-generated
-          add-paths: |
-            data.json
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pr.number,
+              labels: ['auto-generated']
+            });
