@@ -37,7 +37,6 @@ body:
     attributes:
       label: Generic Prompt
       description: The standard prompt text (used when "Generic Prompt" tab is active).
-      render: json
     validations:
       required: true
 
@@ -47,7 +46,6 @@ body:
       label: Reference Prompt (If applicable)
       description: The full prompt text to be used when "Using Reference Photo" is active. Typically contains "Use the uploaded reference image..."
       placeholder: "Use the uploaded reference image as..."
-      render: json
     validations:
       required: false
 

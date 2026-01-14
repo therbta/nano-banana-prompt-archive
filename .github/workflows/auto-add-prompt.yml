@@ -33,10 +33,15 @@ jobs:
               return match ? match[1].trim() : '';
             };
             
+            // Strip markdown code fences if present
+            const stripCodeFence = (text) => {
+              return text.replace(/^```(?:json)?\s*\n?/i, '').replace(/\n?```\s*$/i, '').trim();
+            };
+            
             const promptType = parseField('Prompt Type').toLowerCase();
             const hasReference = parseField('Can it be used with a reference image\\?').toLowerCase();
-            const genericPrompt = parseField('Generic Prompt');
-            const referencePrompt = parseField('Reference Prompt \\(If applicable\\)');
+            const genericPrompt = stripCodeFence(parseField('Generic Prompt'));
+            const referencePrompt = stripCodeFence(parseField('Reference Prompt \\(If applicable\\)'));
             const imageUrl = parseField('Example Image URL \\(Optional\\)');
             const twitterUrl = parseField('Twitter/X Post URL \\(Optional\\)');
             const tweetId = parseField('Tweet ID \\(Optional\\)');
