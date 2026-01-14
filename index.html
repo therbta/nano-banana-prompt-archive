@@ -428,7 +428,7 @@
                         </div>
                     </div>
                     <div class="card-footer">
-                        <span class="tweet-id">ID: ${item.tweetId}</span>
+                        <span class="tweet-id">${item.contributor ? `By: @${item.contributor}` : (item.tweetId && !item.tweetId.startsWith('issue-') ? `ID: ${item.tweetId}` : `ID: ${item.id}`)}</span>
                         <button class="btn-copy-full" onclick="copyPrompt(${item.id})">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
                             Copy
