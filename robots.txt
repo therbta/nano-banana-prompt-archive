@@ -1,0 +1,11 @@
+# Robots.txt for Nano Banana Prompts Archive
+# https://therbta.github.io/nano-banana-prompt-archive/
+
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://therbta.github.io/nano-banana-prompt-archive/sitemap.xml
+
+# Crawl-delay (optional, for polite crawling)
+Crawl-delay: 1
