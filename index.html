@@ -594,8 +594,8 @@
             promptsData.forEach((item, index) => {
                 // Check if reference prompt exists and is not empty when in reference mode
                 if (currentPromptMode === 'reference') {
-                    const promptsObj = item.prompts || {};
-                    const refPrompt = promptsObj.withReferenceUpload;
+                    const formattedPrompts = item.formattedPrompts || {};
+                    const refPrompt = formattedPrompts.withReferenceUpload;
                     if (!refPrompt || (typeof refPrompt === 'string' && refPrompt.trim() === '')) {
                         return; // Skip this prompt if it doesn't have a valid reference version
                     }
